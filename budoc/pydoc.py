@@ -11,58 +11,15 @@ import sys
 
 import_path = sys.path[:]
 
-def html(module_name, docfilter=None, allsubmodules=False,
-         external_links=False, link_prefix='', source=True):
+def _is_exported(ident_name):
     """
-    Returns the documentation for the module `module_name` in HTML
-    format. The module must be importable.
+    Returns `True` if `ident_name` matches the export criteria for an
+    identifier name.
 
-    `docfilter` is an optional predicate that controls which
-    documentation objects are shown in the output. It is a single
-    argument function that takes a documentation object and returns
-    `True` or `False`. If `False`, that object will not be included in
-    the output.
-
-    If `allsubmodules` is `True`, then every submodule of this module
-    that can be found will be included in the documentation, regardless
-    of whether `__all__` contains it.
-
-    If `external_links` is `True`, then identifiers to external modules
-    are always turned into links.
-
-    If `link_prefix` is `True`, then all links will have that prefix.
-    Otherwise, links are always relative.
-
-    If `source` is `True`, then source code will be retrieved for
-    every Python object whenever possible. This can dramatically
-    decrease performance when documenting large modules.
+    This should not be used by clients. Instead, use
+    `pdoc.Module.is_public`.
     """
-    mod = Module(import_module(module_name),
-                 docfilter=docfilter,
-                 allsubmodules=allsubmodules)
-    return mod.html(external_links=external_links,
-                    link_prefix=link_prefix, source=source)
-
-
-def text(module_name, docfilter=None, allsubmodules=False):
-    """
-    Returns the documentation for the module `module_name` in plain
-    text format. The module must be importable.
-
-    `docfilter` is an optional predicate that controls which
-    documentation objects are shown in the output. It is a single
-    argument function that takes a documentation object and returns
-    True of False. If False, that object will not be included in the
-    output.
-
-    If `allsubmodules` is `True`, then every submodule of this module
-    that can be found will be included in the documentation, regardless
-    of whether `__all__` contains it.
-    """
-    mod = Module(import_module(module_name),
-                 docfilter=docfilter,
-                 allsubmodules=allsubmodules)
-    return mod.text()
+    return not ident_name.startswith('_')
 
 
 def import_module(module_name):
@@ -118,26 +75,6 @@ def _source(obj):
         return inspect.getsourcelines(obj)[0]
     except:
         return []
-
-
-def _get_tpl(name):
-    """
-    Returns the Mako template with the given name.  If the template
-    cannot be found, a nicer error message is displayed.
-    """
-    try:
-        t = tpl_lookup.get_template(name)
-    except TopLevelLookupException:
-        locs = [path.join(p, name.lstrip('/')) for p in _template_path]
-        raise IOError(2, 'No template at any of: %s' % ', '.join(locs))
-    return t
-
-
-def _eprint(*args, **kwargs):
-    """Print to stderr."""
-    kwargs['file'] = sys.stderr
-    print(*args, **kwargs)
-
 
 def _safe_import(module_name):
     """
@@ -199,16 +136,6 @@ def _var_docstrings(tree, module, cls=None, init=False):
     return vs
 
 
-def _is_exported(ident_name):
-    """
-    Returns `True` if `ident_name` matches the export criteria for an
-    identifier name.
-
-    This should not be used by clients. Instead, use
-    `pdoc.Module.is_public`.
-    """
-    return not ident_name.startswith('_')
-
 class Doc (object):
     """
     A base class for all documentation objects.
@@ -228,7 +155,7 @@ class Doc (object):
     def __init__(self, name, module, docstring):
         """
         Initializes a documentation object, where `name` is the public
-        identifier name, `module` is a `pdoc.Module` object, and
+        identifier name, `module` is a `budoc.pydoc.Module` object, and
         `docstring` is a string containing the docstring for `name`.
         """
         self.module = module
@@ -266,9 +193,6 @@ class Doc (object):
         Returns an appropriate reference name for this documentation
         object. Usually this is its fully qualified path. Every
         documentation object must provide this property.
-
-        e.g., The refname for this property is
-        <code>pdoc.Doc.refname</code>.
         """
         assert False, 'subclass responsibility'
 
@@ -287,8 +211,8 @@ class Module (Doc):
     Representation of a module's documentation.
     """
 
-    __pdoc__['Module.module'] = 'The Python module object.'
-    __pdoc__['Module.name'] = \
+    __budoc__['Module.module'] = 'The Python module object.'
+    __budoc__['Module.name'] = \
         """
         The name of this module with respect to the context in which
         it was imported. It is always an absolute import path.
@@ -404,8 +328,8 @@ class Module (Doc):
                 for f in docobj.functions():
                     self.refdoc[f.refname] = f
 
-        # Finally look for more docstrings in the __pdoc__ override.
-        for name, docstring in getattr(self.module, '__pdoc__', {}).items():
+        # Finally look for more docstrings in the __budoc__ override.
+        for name, docstring in getattr(self.module, '__budoc__', {}).items():
             refname = '%s.%s' % (self.refname, name)
             if docstring is None:
                 self.doc.pop(name, None)
@@ -416,40 +340,6 @@ class Module (Doc):
             if isinstance(dobj, External):
                 continue
             dobj.docstring = inspect.cleandoc(docstring)
-
-    def text(self):
-        """
-        Returns the documentation for this module as plain text.
-        """
-        t = _get_tpl('/text.mako')
-        text, _ = re.subn('\n\n\n+', '\n\n', t.render(module=self).strip())
-        return text
-
-    def html(self, external_links=False, link_prefix='',
-             source=True, **kwargs):
-        """
-        Returns the documentation for this module as
-        self-contained HTML.
-
-        If `external_links` is `True`, then identifiers to external
-        modules are always turned into links.
-
-        If `link_prefix` is `True`, then all links will have that
-        prefix. Otherwise, links are always relative.
-
-        If `source` is `True`, then source code will be retrieved for
-        every Python object whenever possible. This can dramatically
-        decrease performance when documenting large modules.
-
-        `kwargs` is passed to the `mako` render function.
-        """
-        t = _get_tpl('/html.mako')
-        t = t.render(module=self,
-                     external_links=external_links,
-                     link_prefix=link_prefix,
-                     show_source_code=source,
-                     **kwargs)
-        return t.strip()
 
     def is_package(self):
         """
@@ -794,10 +684,10 @@ class Class (Doc):
         Python object. This counts the `__init__` method as being
         public.
         """
-        _pdoc = getattr(self.module.module, '__pdoc__', {})
+        _budoc = getattr(self.module.module, '__budoc__', {})
 
         def forced_out(name):
-            return _pdoc.get('%s.%s' % (self.name, name), False) is None
+            return _budoc.get('%s.%s' % (self.name, name), False) is None
 
         def exported(name):
             exported = name == '__init__' or _is_exported(name)
