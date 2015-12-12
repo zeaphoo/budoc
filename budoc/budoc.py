@@ -57,3 +57,28 @@ def budoc_one(module_name, ident_name = None, **kwargs):
             module = pydoc.import_module(module_name)
         module = pydoc.Module(module, docfilter=docfilter,
                          allsubmodules=all_submodules)
+        return gen_markdown(module)
+
+
+def gen_markdown_variable(variable):
+    pass
+
+def gen_markdown_function(function):
+    pass
+
+def gen_markdown_class(cls):
+    pass
+
+def gen_markdown_module(module):
+    lines = []
+    write = lines.append
+    write('# Module %s'%(module.name))
+    if not module._filtering:
+        write(module.docstring)
+
+    variables = module.variables()
+    write('## Variables')
+    for var in variables:
+        write()
+
+    return '\n'.join(lines)
