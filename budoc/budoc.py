@@ -57,28 +57,77 @@ def budoc_one(module_name, ident_name = None, **kwargs):
             module = pydoc.import_module(module_name)
         module = pydoc.Module(module, docfilter=docfilter,
                          allsubmodules=all_submodules)
-        return gen_markdown(module)
+        return MarkdownGenerator(module).gen()
 
 
-def gen_markdown_variable(variable):
-    pass
+class MarkdownGenerator(object):
+    def __init__(self, module):
+        self.lines = []
+        self.write = lines.append
+        self.module = module
 
-def gen_markdown_function(function):
-    pass
 
-def gen_markdown_class(cls):
-    pass
+    def gen_variable(self, var):
+        self.write('*%s*'%(var))
+        self.write('')
+        self.write(var.docstring)
 
-def gen_markdown_module(module):
-    lines = []
-    write = lines.append
-    write('# Module %s'%(module.name))
-    if not module._filtering:
-        write(module.docstring)
+    def gen_function(self, func):
+        write = self.write
+        write('## %s'%(func.name))
+        write('*%s* (%s)'%(func.name, func.spec()))
+        write('')
+        write(func.docstring)
 
-    variables = module.variables()
-    write('## Variables')
-    for var in variables:
-        write()
+    def gen_class(self, aclass):
+        write = self.write
+        write('## %s'%(aclass.name))
+        class_vars = aclass.class_variables()
+        static_methods = aclass.functions()
+        methods = aclass.methods()
+        inst_vars = aclass.instance_variables()
 
-    return '\n'.join(lines)
+        if class_vars:
+            write('### Class Variables')
+            for var in class_vars:
+                write('*%s*'%(var))
+
+        if inst_vars:
+            write('### Instance Variables')
+            for var in ins_vars:
+                write('*%s*'%(var))
+
+        if static_methods:
+            for func in static_methods:
+                write('### %s'%(func.name))
+                write('*%s* (%s)'%(func.name, func.spec()))
+                write('')
+                write(func.docstring)
+
+        if methods:
+            for func in methods:
+                write('### %s'%(func.name))
+                write('*%s* (%s)'%(func.name, func.spec()))
+                write('')
+                write(func.docstring)
+
+    def gen(self):
+        module = self.module
+        write('# Module %s'%(module.name))
+        if not module._filtering:
+            self.write(module.docstring)
+
+        variables = module.variables()
+        write('## Variables')
+        for var in variables:
+            self.gen_variable(var)
+
+        functions = module.functions()
+        for func in functions:
+            self.gen_function(func)
+
+        classes = module.classes()
+        for aclass in classes:
+            self.gen_class(aclass)
+
+        return '\n'.join(self.lines)
