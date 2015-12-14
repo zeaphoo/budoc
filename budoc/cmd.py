@@ -41,10 +41,9 @@ aa('--all-submodules', action='store_true',
 
 args = parser.parse_args()
 
-
 def run():
     if args.version:
-        print(budoc.__version__)
+        print('budoc %s'%(budoc.__version__))
         sys.exit(0)
 
     # We close stdin because some modules, upon import, are not very polite
@@ -54,7 +53,10 @@ def run():
     except:
         pass
 
-    budoc.dudoc_one(module, args.ident_name, allsubmodules=args.all_submodules)
+    if not args.module_name:
+        parser.print_help()
+        sys.exit(0)
+    budoc.budoc_one(args.module_name, args.ident_name, allsubmodules=args.all_submodules)
 
 
 if __name__ == '__main__':

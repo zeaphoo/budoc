@@ -57,18 +57,21 @@ def budoc_one(module_name, ident_name = None, **kwargs):
             module = pydoc.import_module(module_name)
         module = pydoc.Module(module, docfilter=docfilter,
                          allsubmodules=all_submodules)
-        return MarkdownGenerator(module).gen()
+
+    doc = MarkdownGenerator(module).gen()
+    print(doc)
+    return doc
 
 
 class MarkdownGenerator(object):
     def __init__(self, module):
         self.lines = []
-        self.write = lines.append
+        self.write = self.lines.append
         self.module = module
 
 
     def gen_variable(self, var):
-        self.write('*%s*'%(var))
+        self.write('*%s*'%(var.name))
         self.write('')
         self.write(var.docstring)
 
@@ -90,12 +93,12 @@ class MarkdownGenerator(object):
         if class_vars:
             write('### Class Variables')
             for var in class_vars:
-                write('*%s*'%(var))
+                write('*%s*'%(var.name))
 
         if inst_vars:
             write('### Instance Variables')
-            for var in ins_vars:
-                write('*%s*'%(var))
+            for var in inst_vars:
+                write('*%s*'%(var.name))
 
         if static_methods:
             for func in static_methods:
@@ -113,9 +116,10 @@ class MarkdownGenerator(object):
 
     def gen(self):
         module = self.module
+        write = self.write
         write('# Module %s'%(module.name))
         if not module._filtering:
-            self.write(module.docstring)
+            write(module.docstring)
 
         variables = module.variables()
         write('## Variables')

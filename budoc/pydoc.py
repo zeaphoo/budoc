@@ -152,6 +152,7 @@ class Doc (object):
     also correspond to unexported members of the module, particularly in
     a class's ancestor list.)
     """
+
     def __init__(self, name, module, docstring):
         """
         Initializes a documentation object, where `name` is the public
@@ -205,12 +206,53 @@ class Doc (object):
         """
         return len(self.docstring.strip()) == 0
 
+class External (Doc):
+    """
+    A representation of an external identifier. The textual
+    representation is the same as an internal identifier, but without
+    any context. (Usually this makes linking more difficult.)
+    External identifiers are also used to represent something that is
+    not exported but appears somewhere in the public interface (like
+    the ancestor list of a class).
+    """
+    __budoc__ = {}
+    __budoc__['External.docstring'] = \
+        """
+        An empty string. External identifiers do not have
+        docstrings.
+        """
+    __budoc__['External.module'] = \
+        """
+        Always `None`. External identifiers have no associated
+        `pdoc.Module`.
+        """
+    __budoc__['External.name'] = \
+        """
+        Always equivalent to `pdoc.External.refname` since external
+        identifiers are always expressed in their fully qualified
+        form.
+        """
+
+    def __init__(self, name):
+        """
+        Initializes an external identifier with `name`, where `name`
+        should be a fully qualified name.
+        """
+        super(External, self).__init__(name, None, '')
+
+    @property
+    def source(self):
+        return []
+
+    @property
+    def refname(self):
+        return self.name
 
 class Module (Doc):
     """
     Representation of a module's documentation.
     """
-
+    __budoc__ = {}
     __budoc__['Module.module'] = 'The Python module object.'
     __budoc__['Module.name'] = \
         """
