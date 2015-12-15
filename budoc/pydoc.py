@@ -17,7 +17,7 @@ def _is_exported(ident_name):
     identifier name.
 
     This should not be used by clients. Instead, use
-    `pdoc.Module.is_public`.
+    `pydoc.Module.is_public`.
     """
     return not ident_name.startswith('_')
 
@@ -27,7 +27,7 @@ def import_module(module_name):
     Imports a module. A single point of truth for importing modules to
     be documented by `pdoc`. In particular, it makes sure that the top
     module in `module_name` can be imported by using only the paths in
-    `pdoc.import_path`.
+    `pydoc.import_path`.
 
     If a module has already been imported, then its corresponding entry
     in `sys.modules` is returned. This means that modules that have
@@ -48,7 +48,7 @@ def import_module(module_name):
 
         # Raises an exception if the parent module cannot be imported.
         # This hopefully ensures that we only explicitly import modules
-        # contained in `pdoc.import_path`.
+        # contained in `pydoc.import_path`.
         imp.find_module(module_name.split('.')[0], import_path)
 
     if module_name in sys.modules:
@@ -100,14 +100,14 @@ def _safe_import(module_name):
 def _var_docstrings(tree, module, cls=None, init=False):
     """
     Extracts variable docstrings given `tree` as the abstract syntax,
-    `module` as a `pdoc.Module` containing `tree` and an option `cls`
-    as a `pdoc.Class` corresponding to the tree. In particular, `cls`
+    `module` as a `pydoc.Module` containing `tree` and an option `cls`
+    as a `pydoc.Class` corresponding to the tree. In particular, `cls`
     should be specified when extracting docstrings from a class or an
     `__init__` method. Finally, `init` should be `True` when searching
     the AST of an `__init__` method so that `_var_docstrings` will only
     accept variables starting with `self.` as instance variables.
 
-    A dictionary mapping variable name to a `pdoc.Variable` object is
+    A dictionary mapping variable name to a `pydoc.Variable` object is
     returned.
     """
     vs = {}
@@ -146,7 +146,7 @@ class Doc (object):
     for extracting docstrings from the abstract syntax tree, which means
     that variables (module, class or instance) are supported too.
 
-    A special type of documentation object `pdoc.External` is used to
+    A special type of documentation object `pydoc.External` is used to
     represent identifiers that are not part of the public interface of
     a module. (The name "External" is a bit of a misnomer, since it can
     also correspond to unexported members of the module, particularly in
@@ -224,11 +224,11 @@ class External (Doc):
     __budoc__['External.module'] = \
         """
         Always `None`. External identifiers have no associated
-        `pdoc.Module`.
+        `pydoc.Module`.
         """
     __budoc__['External.name'] = \
         """
-        Always equivalent to `pdoc.External.refname` since external
+        Always equivalent to `pydoc.External.refname` since external
         identifiers are always expressed in their fully qualified
         form.
         """
@@ -267,16 +267,16 @@ class Module (Doc):
 
         `docfilter` is an optional predicate that controls which
         documentation objects are returned in the following
-        methods: `pdoc.Module.classes`, `pdoc.Module.functions`,
-        `pdoc.Module.variables` and `pdoc.Module.submodules`. The
-        filter is propagated to the analogous methods on a `pdoc.Class`
+        methods: `pydoc.Module.classes`, `pydoc.Module.functions`,
+        `pydoc.Module.variables` and `pydoc.Module.submodules`. The
+        filter is propagated to the analogous methods on a `pydoc.Class`
         object.
 
         If `allsubmodules` is `True`, then every submodule of this
         module that can be found will be included in the
         documentation, regardless of whether `__all__` contains it.
         """
-        name = getattr(module, '__pdoc_module_name', module.__name__)
+        name = getattr(module, '__budoc_module_name', module.__name__)
         super(Module, self).__init__(name, module, inspect.getdoc(module))
 
         self._filtering = docfilter is not None
@@ -288,7 +288,7 @@ class Module (Doc):
 
         self.refdoc = {}
         """
-        The same as `pdoc.Module.doc`, but maps fully qualified
+        The same as `pydoc.Module.doc`, but maps fully qualified
         identifier names to documentation objects.
         """
 
@@ -405,8 +405,8 @@ class Module (Doc):
         Returns a method resolution list of documentation objects
         for `cls`, which must be a documentation object.
 
-        The list will contain objects belonging to `pdoc.Class` or
-        `pdoc.External`. Objects belonging to the former are exported
+        The list will contain objects belonging to `pydoc.Class` or
+        `pydoc.External`. Objects belonging to the former are exported
         classes either in this module or in one of its sub-modules.
         """
         ups = inspect.getmro(cls.cls)
@@ -417,8 +417,8 @@ class Module (Doc):
         Returns a descendent list of documentation objects for `cls`,
         which must be a documentation object.
 
-        The list will contain objects belonging to `pdoc.Class` or
-        `pdoc.External`. Objects belonging to the former are exported
+        The list will contain objects belonging to `pydoc.Class` or
+        `pydoc.External`. Objects belonging to the former are exported
         classes either in this module or in one of its sub-modules.
         """
         if cls.cls == type or not hasattr(cls.cls, '__subclasses__'):
@@ -436,7 +436,7 @@ class Module (Doc):
         sub-modules are not checked.
 
         `name` should be a fully qualified name, e.g.,
-        <code>pdoc.Module.is_public</code>.
+        <code>pydoc.Module.is_public</code>.
         """
         return name in self.refdoc
 
@@ -479,7 +479,7 @@ class Module (Doc):
     def variables(self):
         """
         Returns all documented module level variables in the module
-        sorted alphabetically as a list of `pdoc.Variable`.
+        sorted alphabetically as a list of `pydoc.Variable`.
         """
         p = lambda o: isinstance(o, Variable) and self._docfilter(o)
         return sorted(filter(p, self.doc.values()))
@@ -487,7 +487,7 @@ class Module (Doc):
     def classes(self):
         """
         Returns all documented module level classes in the module
-        sorted alphabetically as a list of `pdoc.Class`.
+        sorted alphabetically as a list of `pydoc.Class`.
         """
         p = lambda o: isinstance(o, Class) and self._docfilter(o)
         return sorted(filter(p, self.doc.values()))
@@ -495,7 +495,7 @@ class Module (Doc):
     def functions(self):
         """
         Returns all documented module level functions in the module
-        sorted alphabetically as a list of `pdoc.Function`.
+        sorted alphabetically as a list of `pydoc.Function`.
         """
         p = lambda o: isinstance(o, Function) and self._docfilter(o)
         return sorted(filter(p, self.doc.values()))
@@ -503,7 +503,7 @@ class Module (Doc):
     def submodules(self):
         """
         Returns all documented sub-modules in the module sorted
-        alphabetically as a list of `pdoc.Module`.
+        alphabetically as a list of `pydoc.Module`.
         """
         p = lambda o: isinstance(o, Module) and self._docfilter(o)
         return sorted(filter(p, self.doc.values()))
@@ -560,7 +560,7 @@ class Module (Doc):
         # Forcefully set the module name so that it is always the absolute
         # import path. We can't rely on `obj.__name__`, since it doesn't
         # necessarily correspond to the public exported name of the module.
-        obj.__dict__['__pdoc_module_name'] = '%s.%s' % (self.refname, name)
+        obj.__dict__['__budoc_module_name'] = '%s.%s' % (self.refname, name)
         return Module(obj,
                       docfilter=self._docfilter,
                       allsubmodules=self._allsubmodules)
@@ -573,7 +573,7 @@ class Class (Doc):
 
     def __init__(self, name, module, class_obj):
         """
-        Same as `pdoc.Doc.__init__`, except `class_obj` must be a
+        Same as `pydoc.Doc.__init__`, except `class_obj` must be a
         Python class object. The docstring is gathered automatically.
         """
         super(Class, self).__init__(name, module, inspect.getdoc(class_obj))
@@ -582,11 +582,11 @@ class Class (Doc):
         """The class Python object."""
 
         self.doc = {}
-        """A mapping from identifier name to a `pdoc.Doc` objects."""
+        """A mapping from identifier name to a `pydoc.Doc` objects."""
 
         self.doc_init = {}
         """
-        A special version of `pdoc.Class.doc` that contains
+        A special version of `pydoc.Class.doc` that contains
         documentation for instance variables found in the `__init__`
         method.
         """
@@ -646,7 +646,7 @@ class Class (Doc):
     def class_variables(self):
         """
         Returns all documented class variables in the class, sorted
-        alphabetically as a list of `pdoc.Variable`.
+        alphabetically as a list of `pydoc.Variable`.
         """
         p = lambda o: isinstance(o, Variable) and self.module._docfilter(o)
         return sorted(filter(p, self.doc.values()))
@@ -654,7 +654,7 @@ class Class (Doc):
     def instance_variables(self):
         """
         Returns all instance variables in the class, sorted
-        alphabetically as a list of `pdoc.Variable`. Instance variables
+        alphabetically as a list of `pydoc.Variable`. Instance variables
         are attributes of `self` defined in a class's `__init__`
         method.
         """
@@ -663,7 +663,7 @@ class Class (Doc):
 
     def methods(self):
         """
-        Returns all documented methods as `pdoc.Function` objects in
+        Returns all documented methods as `pydoc.Function` objects in
         the class, sorted alphabetically with `__init__` always coming
         first.
 
@@ -676,7 +676,7 @@ class Class (Doc):
 
     def functions(self):
         """
-        Returns all documented static functions as `pdoc.Function`
+        Returns all documented static functions as `pydoc.Function`
         objects in the class, sorted alphabetically.
         """
         p = lambda o: (isinstance(o, Function)
@@ -746,11 +746,11 @@ class Function (Doc):
 
     def __init__(self, name, module, func_obj, cls=None, method=False):
         """
-        Same as `pdoc.Doc.__init__`, except `func_obj` must be a
+        Same as `pydoc.Doc.__init__`, except `func_obj` must be a
         Python function object. The docstring is gathered automatically.
 
         `cls` should be set when this is a method or a static function
-        beloing to a class. `cls` should be a `pdoc.Class` object.
+        beloing to a class. `cls` should be a `pydoc.Class` object.
 
         `method` should be `True` when the function is a method. In
         all other cases, it should be `False`.
@@ -762,7 +762,7 @@ class Function (Doc):
 
         self.cls = cls
         """
-        The `pdoc.Class` documentation object if this is a method. If
+        The `pydoc.Class` documentation object if this is a method. If
         not, this is None.
         """
 
@@ -843,8 +843,8 @@ class Variable (Doc):
 
     def __init__(self, name, module, docstring, cls=None):
         """
-        Same as `pdoc.Doc.__init__`, except `cls` should be provided
-        as a `pdoc.Class` object when this is a class or instance
+        Same as `pydoc.Doc.__init__`, except `cls` should be provided
+        as a `pydoc.Class` object when this is a class or instance
         variable.
         """
         super(Variable, self).__init__(name, module, docstring)

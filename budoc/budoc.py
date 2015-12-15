@@ -10,6 +10,15 @@ import re
 import sys
 from . import pydoc
 
+import re
+
+def indent(s, spaces=4):
+    """
+    Inserts `spaces` after each string of new lines in `s`
+    and before the start of the string.
+    """
+    new = re.sub('(\n+)', '\\1%s' % (' ' * spaces), s)
+    return (' ' * spaces) + new.strip()
 
 def budoc_one(module_name, ident_name = None, **kwargs):
     docfilter = None
@@ -55,9 +64,9 @@ def budoc_one(module_name, ident_name = None, **kwargs):
                 module.__pydoc_module_name = module_name
         else:
             module = pydoc.import_module(module_name)
-        module = pydoc.Module(module, docfilter=docfilter,
-                         allsubmodules=all_submodules)
 
+    module = pydoc.Module(module, docfilter=docfilter,
+                         allsubmodules=all_submodules)
     doc = MarkdownGenerator(module).gen()
     print(doc)
     return doc
@@ -71,58 +80,62 @@ class MarkdownGenerator(object):
 
 
     def gen_variable(self, var):
-        self.write('*%s*'%(var.name))
+        self.write('')
+        self.write('##var **%s**'%(var.name))
         self.write('')
         self.write(var.docstring)
 
     def gen_function(self, func):
         write = self.write
-        write('## %s'%(func.name))
-        write('*%s* (%s)'%(func.name, func.spec()))
+        write('')
+        write('##def **%s**(%s)'%(func.name, func.spec()))
         write('')
         write(func.docstring)
 
     def gen_class(self, aclass):
         write = self.write
-        write('## %s'%(aclass.name))
+        write('##class %s'%(aclass.name))
         class_vars = aclass.class_variables()
         static_methods = aclass.functions()
         methods = aclass.methods()
         inst_vars = aclass.instance_variables()
 
         if class_vars:
-            write('### Class Variables')
             for var in class_vars:
-                write('*%s*'%(var.name))
+                write('')
+                write('###var **%s**'%(var.name))
+                write('')
+                write(var.docstring)
 
         if inst_vars:
-            write('### Instance Variables')
             for var in inst_vars:
-                write('*%s*'%(var.name))
+                write('')
+                write('###var **%s**'%(var.name))
+                write('')
+                write(var.docstring)
 
         if static_methods:
             for func in static_methods:
-                write('### %s'%(func.name))
-                write('*%s* (%s)'%(func.name, func.spec()))
+                write('')
+                write('###def **%s**(%s)'%(func.name, func.spec()))
                 write('')
                 write(func.docstring)
 
         if methods:
             for func in methods:
-                write('### %s'%(func.name))
-                write('*%s* (%s)'%(func.name, func.spec()))
+                write('')
+                write('###def **%s**(%s)'%(func.name, func.spec()))
                 write('')
                 write(func.docstring)
 
     def gen(self):
         module = self.module
         write = self.write
-        write('# Module %s'%(module.name))
+        write('#Module %s'%(module.name))
         if not module._filtering:
             write(module.docstring)
 
         variables = module.variables()
-        write('## Variables')
         for var in variables:
             self.gen_variable(var)
 
