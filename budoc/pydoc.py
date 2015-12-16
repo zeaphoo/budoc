@@ -684,6 +684,12 @@ class Class (Doc):
                        and self.module._docfilter(o))
         return sorted(filter(p, self.doc.values()))
 
+    def init_method(self):
+        p = lambda o: (isinstance(o, Function)
+                       and o.method and o.name == '__init__'
+                       and self.module._docfilter(o))
+        return sorted(filter(p, self.doc.values()))[0]
+
     def _fill_inheritance(self):
         """
         Traverses this class's ancestor list and attempts to fill in

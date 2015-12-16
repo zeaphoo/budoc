@@ -94,7 +94,10 @@ class MarkdownGenerator(object):
 
     def gen_class(self, aclass):
         write = self.write
-        write('##class %s'%(aclass.name))
+        init_method =  aclass.init_method()
+        write('##class %s(%s)'%(aclass.name, init_method.spec()))
+        write('')
+        write(init_method.docstring)
         class_vars = aclass.class_variables()
         static_methods = aclass.functions()
         methods = aclass.methods()
@@ -123,6 +126,8 @@ class MarkdownGenerator(object):
 
         if methods:
             for func in methods:
+                if func.name == '__init__':
+                    continue
                 write('')
                 write('###def **%s**(%s)'%(func.name, func.spec()))
                 write('')
