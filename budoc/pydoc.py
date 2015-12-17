@@ -649,7 +649,7 @@ class Class (Doc):
         alphabetically as a list of `pydoc.Variable`.
         """
         p = lambda o: isinstance(o, Variable) and self.module._docfilter(o)
-        return sorted(filter(p, self.doc.values()))
+        return filter(p, self.doc.values())
 
     def instance_variables(self):
         """
@@ -659,7 +659,7 @@ class Class (Doc):
         method.
         """
         p = lambda o: isinstance(o, Variable) and self.module._docfilter(o)
-        return sorted(filter(p, self.doc_init.values()))
+        return filter(p, self.doc_init.values())
 
     def methods(self):
         """
@@ -672,7 +672,7 @@ class Class (Doc):
         p = lambda o: (isinstance(o, Function)
                        and o.method
                        and self.module._docfilter(o))
-        return sorted(filter(p, self.doc.values()))
+        return filter(p, self.doc.values())
 
     def functions(self):
         """
@@ -682,13 +682,15 @@ class Class (Doc):
         p = lambda o: (isinstance(o, Function)
                        and not o.method
                        and self.module._docfilter(o))
-        return sorted(filter(p, self.doc.values()))
+        return filter(p, self.doc.values())
 
     def init_method(self):
         p = lambda o: (isinstance(o, Function)
                        and o.method and o.name == '__init__'
                        and self.module._docfilter(o))
-        return sorted(filter(p, self.doc.values()))[0]
+        fn = filter(p, self.doc.values())
+
+        return fn[0] if fn else None
 
     def _fill_inheritance(self):
         """
@@ -818,6 +820,8 @@ class Function (Doc):
 
         params = []
         for i, param in enumerate(s.args):
+            if param.lower() == 'self':
+                continue
             if s.defaults is not None and len(s.args) - i <= len(s.defaults):
                 defind = len(s.defaults) - (len(s.args) - i)
                 params.append('%s=%s' % (param, repr(s.defaults[defind])))
