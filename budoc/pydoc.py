@@ -25,7 +25,7 @@ def _is_exported(ident_name):
 def import_module(module_name):
     """
     Imports a module. A single point of truth for importing modules to
-    be documented by `pdoc`. In particular, it makes sure that the top
+    be documented by `pydoc`. In particular, it makes sure that the top
     module in `module_name` can be imported by using only the paths in
     `pydoc.import_path`.
 
@@ -142,7 +142,7 @@ class Doc (object):
 
     A documentation object corresponds to *something* in a Python module
     that has a docstring associated with it. Typically, this only includes
-    modules, classes, functions and methods. However, `pdoc` adds support
+    modules, classes, functions and methods. However, `pydoc` adds support
     for extracting docstrings from the abstract syntax tree, which means
     that variables (module, class or instance) are supported too.
 
@@ -458,7 +458,7 @@ class Module (Doc):
         """
         Searches this module and **all** of its sub-modules for an
         identifier with name `name` in its list of exported
-        identifiers according to `pdoc`. Note that unexported
+        identifiers according to `pydoc`. Note that unexported
         sub-modules are searched.
 
         A bare identifier (without `.` separators) will only be checked
@@ -518,7 +518,7 @@ class Module (Doc):
 
     def __is_exported(self, name, module):
         """
-        Returns `True` if and only if `pdoc` considers `name` to be
+        Returns `True` if and only if `pydoc` considers `name` to be
         a public identifier for this module where `name` was defined
         in the Python module `module`.
 

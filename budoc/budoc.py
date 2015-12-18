@@ -71,6 +71,12 @@ def budoc_one(module_name, ident_name = None, **kwargs):
     print(doc)
     return doc
 
+class NoneFunction(object):
+    def __init__(self):
+        self.docstring = ''
+        
+    def spec(self):
+        return ''
 
 class MarkdownGenerator(object):
     def __init__(self, module):
@@ -94,9 +100,10 @@ class MarkdownGenerator(object):
 
     def gen_class(self, aclass):
         write = self.write
-        init_method =  aclass.init_method()
+        init_method =  aclass.init_method() or NoneFunction()
         write('##class %s(%s)'%(aclass.name, init_method.spec()))
         write('')
+        write(aclass.docstring)
         write(init_method.docstring)
         class_vars = aclass.class_variables()
         static_methods = aclass.functions()
