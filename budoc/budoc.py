@@ -74,7 +74,7 @@ def budoc_one(module_name, ident_name = None, **kwargs):
 class NoneFunction(object):
     def __init__(self):
         self.docstring = ''
-        
+
     def spec(self):
         return ''
 

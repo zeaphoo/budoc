@@ -56,7 +56,7 @@ def run():
     if not args.module_name:
         parser.print_help()
         sys.exit(0)
-    budoc.budoc_one(args.module_name, args.ident_name, allsubmodules=args.all_submodules)
+    budoc.budoc_one(args.module_name, args.ident_name, all_submodules=args.all_submodules)
 
 
 if __name__ == '__main__':
