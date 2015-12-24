@@ -31,8 +31,7 @@ aa('module_name', type=str, nargs='?',
         'package.')
 aa('ident_name', type=str, nargs='?',
    help='When specified, only identifiers containing the name given '
-        'will be shown in the output. Search is case sensitive. '
-        'Has no effect when --http is set.')
+        'will be shown in the output. Search is case sensitive. ')
 aa('--version', action='store_true',
    help='Print the version of budoc and exit.')
 aa('--all-submodules', action='store_true',

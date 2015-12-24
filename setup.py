@@ -20,7 +20,7 @@ setup(
     include_package_data=True,
     zip_safe=False,
     platforms='any',
-    install_requires=[],
+    install_requires=['PyYAML'],
     entry_points={
         'console_scripts': [
             'budoc = budoc.cmd:run']},
