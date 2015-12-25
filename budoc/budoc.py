@@ -22,7 +22,6 @@ def indent(s, spaces=4):
 
 def budoc_one(module_name, ident_name = None, **kwargs):
     docfilter = None
-    all_submodules = kwargs.get('all_submodules')
     if ident_name and len(ident_name.strip()) > 0:
         search = ident_name.strip()
 
@@ -65,9 +64,8 @@ def budoc_one(module_name, ident_name = None, **kwargs):
         else:
             module = pydoc.import_module(module_name)
 
-    module = pydoc.Module(module, docfilter=docfilter,
-                         allsubmodules=all_submodules)
-    doc = MarkdownGenerator(module).gen()
+    module = pydoc.Module(module, docfilter=docfilter)
+    doc = MarkdownGenerator(module).gen(module_doc=False if ident_name else True)
     print(doc)
     return doc
 
@@ -85,23 +83,23 @@ class MarkdownGenerator(object):
         self.module = module
 
 
-    def gen_variable(self, var):
+    def gen_variable(self, var, title_level=2):
         self.write('')
-        self.write('##var **%s**'%(var.name))
+        self.write('%svar **%s**'%('#'*title_level, var.name))
         self.write('')
         self.write(var.docstring)
 
-    def gen_function(self, func):
+    def gen_function(self, func, title_level=2):
         write = self.write
         write('')
-        write('##def **%s**(%s)'%(func.name, func.spec()))
+        write('%sdef **%s**(%s)'%('#'*title_level, func.name, func.spec()))
         write('')
         write(func.docstring)
 
-    def gen_class(self, aclass):
+    def gen_class(self, aclass, title_level=2):
         write = self.write
         init_method =  aclass.init_method() or NoneFunction()
-        write('##class %s(%s)'%(aclass.name, init_method.spec()))
+        write('%sclass %s(%s)'%('#'*title_level, aclass.name, init_method.spec()))
         write('')
         write(aclass.docstring)
         write(init_method.docstring)
@@ -113,21 +111,21 @@ class MarkdownGenerator(object):
         if class_vars:
             for var in class_vars:
                 write('')
-                write('###var **%s**'%(var.name))
+                write('%svar **%s**'%('#'*(title_level+1), var.name))
                 write('')
                 write(var.docstring)
 
         if inst_vars:
             for var in inst_vars:
                 write('')
-                write('###var **%s**'%(var.name))
+                write('%svar **%s**'%('#'*(title_level+1), var.name))
                 write('')
                 write(var.docstring)
 
         if static_methods:
             for func in static_methods:
                 write('')
-                write('###def **%s**(%s)'%(func.name, func.spec()))
+                write('%sdef **%s**(%s)'%('#'*(title_level+1), func.name, func.spec()))
                 write('')
                 write(func.docstring)
 
@@ -136,27 +134,29 @@ class MarkdownGenerator(object):
                 if func.name == '__init__':
                     continue
                 write('')
-                write('###def **%s**(%s)'%(func.name, func.spec()))
+                write('%sdef **%s**(%s)'%('#'*(title_level+1), func.name, func.spec()))
                 write('')
                 write(func.docstring)
 
-    def gen(self):
+    def gen(self, module_doc=True):
         module = self.module
         write = self.write
-        write('#Module %s'%(module.name))
-        if not module._filtering:
-            write(module.docstring)
+        if module_doc:
+            write('#Module %s'%(module.name))
+            if not module._filtering:
+                write(module.docstring)
 
+        title_level = 2 if module_doc else 1
         variables = module.variables()
         for var in variables:
-            self.gen_variable(var)
+            self.gen_variable(var, title_level=title_level)
 
         functions = module.functions()
         for func in functions:
-            self.gen_function(func)
+            self.gen_function(func, title_level=title_level)
 
         classes = module.classes()
         for aclass in classes:
-            self.gen_class(aclass)
+            self.gen_class(aclass, title_level=title_level)
 
         return '\n'.join(self.lines)

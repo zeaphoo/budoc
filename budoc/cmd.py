@@ -34,9 +34,6 @@ aa('ident_name', type=str, nargs='?',
         'will be shown in the output. Search is case sensitive. ')
 aa('--version', action='store_true',
    help='Print the version of budoc and exit.')
-aa('--all-submodules', action='store_true',
-   help='When set, every submodule will be included, regardless of whether '
-        '__all__ is set and contains the submodule.')
 
 args = parser.parse_args()
 
@@ -55,7 +52,7 @@ def run():
     if not args.module_name:
         parser.print_help()
         sys.exit(0)
-    budoc.budoc_one(args.module_name, args.ident_name, all_submodules=args.all_submodules)
+    budoc.budoc_one(args.module_name, args.ident_name)
 
 
 if __name__ == '__main__':

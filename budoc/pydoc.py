@@ -260,7 +260,7 @@ class Module (Doc):
         it was imported. It is always an absolute import path.
         """
 
-    def __init__(self, module, docfilter=None, allsubmodules=False):
+    def __init__(self, module, docfilter=None):
         """
         Creates a `Module` documentation object given the actual
         module Python object.
@@ -271,17 +271,13 @@ class Module (Doc):
         `pydoc.Module.variables` and `pydoc.Module.submodules`. The
         filter is propagated to the analogous methods on a `pydoc.Class`
         object.
-
-        If `allsubmodules` is `True`, then every submodule of this
-        module that can be found will be included in the
-        documentation, regardless of whether `__all__` contains it.
         """
         name = getattr(module, '__budoc_module_name', module.__name__)
         super(Module, self).__init__(name, module, inspect.getdoc(module))
 
         self._filtering = docfilter is not None
         self._docfilter = (lambda _: True) if docfilter is None else docfilter
-        self._allsubmodules = allsubmodules
+        self._allsubmodules = False
 
         self.doc = {}
         """A mapping from identifier name to a documentation object."""
@@ -536,6 +532,8 @@ class Module (Doc):
         if hasattr(self.module, '__all__'):
             return name in self.module.__all__
         if not _is_exported(name):
+            return False
+        if module is None:
             return False
         if module is not None and self.module.__name__ != module.__name__:
             return name in self._declared_variables
