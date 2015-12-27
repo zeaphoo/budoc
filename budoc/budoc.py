@@ -20,6 +20,9 @@ def indent(s, spaces=4):
     new = re.sub('(\n+)', '\\1%s' % (' ' * spaces), s)
     return (' ' * spaces) + new.strip()
 
+def budoc_all(bu_config, ident_name = None, **kwargs):
+    pass
+
 def budoc_one(module_name, ident_name = None, **kwargs):
     docfilter = None
     if ident_name and len(ident_name.strip()) > 0:

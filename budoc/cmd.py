@@ -14,6 +14,7 @@ import sys
 import tempfile
 
 import budoc
+from .config import load_config
 
 # `xrange` is `range` with Python3.
 try:
@@ -25,13 +26,16 @@ parser = argparse.ArgumentParser(
     description='Automatically generate API docs for Python modules.',
     formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 aa = parser.add_argument
-aa('module_name', type=str, nargs='?',
-   help='The Python module name. This may be an import path resolvable in '
-        'the current environment, or a file path to a Python module or '
-        'package.')
+aa('module_or_config', type=str, nargs='?',
+   help='The Python module name Or Config file. '
+        'May be an import path resolvable in the current environment, '
+        'OR a file path to a Python module or package, '
+        'OR path of config file.', default='budoc.yml')
+
 aa('ident_name', type=str, nargs='?',
    help='When specified, only identifiers containing the name given '
         'will be shown in the output. Search is case sensitive. ')
+
 aa('--version', action='store_true',
    help='Print the version of budoc and exit.')
 
@@ -49,10 +53,20 @@ def run():
     except:
         pass
 
-    if not args.module_name:
+    if not os.path.exists('budoc.yml'):
         parser.print_help()
         sys.exit(0)
-    budoc.budoc_one(args.module_name, args.ident_name)
+    module_or_config = args.module_or_config
+    name, ext = os.path.splitext(module_or_config)
+    if ext == '' or ext.lower() == '.py':
+        budoc.budoc_one(args.module_or_config, args.ident_name)
+    else:
+        try:
+            bu_config = load_config(module_or_config)
+        except:
+            print('Config file %s is not valid yaml format.'%(module_or_config))
+            sys.exit(-1)
+        budoc.budoc_all(bu_config, args.indent_name)
 
 
 if __name__ == '__main__':
