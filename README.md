@@ -23,6 +23,11 @@ The above features are explained in more detail in budoc's documentation.
 
     pip install budoc
 
+# Example Config
+
+```
+
+```
 
 # Example usage
 

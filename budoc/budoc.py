@@ -24,6 +24,7 @@ def budoc_all(bu_config, ident_name = None, **kwargs):
     pass
 
 def budoc_one(module_name, ident_name = None, **kwargs):
+    stdout = kwargs.get('stdout', False)
     docfilter = None
     if ident_name and len(ident_name.strip()) > 0:
         search = ident_name.strip()
@@ -69,7 +70,9 @@ def budoc_one(module_name, ident_name = None, **kwargs):
 
     module = pydoc.Module(module, docfilter=docfilter)
     doc = MarkdownGenerator(module).gen(module_doc=False if ident_name else True)
-    print(doc)
+    if stdout:
+        sys.stdout.write(doc)
+        sys.stdout.flush()
     return doc
 
 class NoneFunction(object):

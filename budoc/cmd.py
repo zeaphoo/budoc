@@ -53,18 +53,15 @@ def run():
     except:
         pass
 
-    if not os.path.exists('budoc.yml'):
-        parser.print_help()
-        sys.exit(0)
     module_or_config = args.module_or_config
     name, ext = os.path.splitext(module_or_config)
     if ext == '' or ext.lower() == '.py':
-        budoc.budoc_one(args.module_or_config, args.ident_name)
+        budoc.budoc_one(args.module_or_config, args.ident_name, stdout=True)
     else:
         try:
             bu_config = load_config(module_or_config)
         except:
-            print('Config file %s is not valid yaml format.'%(module_or_config))
+            print('Config file %s not exits or not valid yaml format.'%(module_or_config))
             sys.exit(-1)
         budoc.budoc_all(bu_config, args.indent_name)
 
