@@ -13,7 +13,7 @@ import subprocess
 import sys
 import tempfile
 
-import budoc
+from . import budoc
 from .config import load_config
 
 # `xrange` is `range` with Python3.
@@ -63,7 +63,7 @@ def run():
         except:
             print('Config file %s not exits or not valid yaml format.'%(module_or_config))
             sys.exit(-1)
-        budoc.budoc_all(bu_config, args.indent_name)
+        budoc.budoc_all(bu_config, args.ident_name)
 
 
 if __name__ == '__main__':

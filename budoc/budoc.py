@@ -20,11 +20,25 @@ def indent(s, spaces=4):
     new = re.sub('(\n+)', '\\1%s' % (' ' * spaces), s)
     return (' ' * spaces) + new.strip()
 
+def ensure_dir(f):
+    d = os.path.dirname(f)
+    if not os.path.exists(d):
+        os.makedirs(d)
+
 def budoc_all(bu_config, ident_name = None, **kwargs):
-    pass
+    for doc in bu_config.docs:
+        module_name = doc['module']
+        ident = doc.get('ident')
+        dest = doc.get('dest')
+        md = budoc_one(module_name, ident_name=ident)
+        if dest and md:
+            ensure_dir(dest)
+            with open(dest, 'wb') as f:
+                f.write(md)
 
 def budoc_one(module_name, ident_name = None, **kwargs):
     stdout = kwargs.get('stdout', False)
+    show_module = kwargs.get('show_module', False)
     docfilter = None
     if ident_name and len(ident_name.strip()) > 0:
         search = ident_name.strip()
@@ -69,7 +83,7 @@ def budoc_one(module_name, ident_name = None, **kwargs):
             module = pydoc.import_module(module_name)
 
     module = pydoc.Module(module, docfilter=docfilter)
-    doc = MarkdownGenerator(module).gen(module_doc=False if ident_name else True)
+    doc = MarkdownGenerator(module).gen(module_doc=show_module)
     if stdout:
         sys.stdout.write(doc)
         sys.stdout.flush()

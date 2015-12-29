@@ -26,6 +26,14 @@ The above features are explained in more detail in budoc's documentation.
 # Example Config
 
 ```
+docs:
+- module: budoc.pydoc
+  ident: Module
+  dest: docs/api_pydoc.md
+
+- module: budoc.budoc
+  dest: docs/api_budoc.md
+
 
 ```
 
