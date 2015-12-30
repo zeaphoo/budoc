@@ -25,16 +25,32 @@ def ensure_dir(f):
     if not os.path.exists(d):
         os.makedirs(d)
 
+def output(text):
+    sys.stdout.write(text)
+    sys.stdout.flush()
+
 def budoc_all(bu_config, ident_name = None, **kwargs):
     for doc in bu_config.docs:
         module_name = doc['module']
         ident = doc.get('ident')
         dest = doc.get('dest')
-        md = budoc_one(module_name, ident_name=ident)
+        output('Generating %s%s api docs to %s\n'%(module_name, ':%s'%(ident) if ident else '', dest))
+        try:
+            md = budoc_one(module_name, ident_name=ident)
+        except:
+            output('    Error in generating.\n')
+            continue
+        output('    OK.\n')
         if dest and md:
-            ensure_dir(dest)
-            with open(dest, 'wb') as f:
-                f.write(md)
+            try:
+                output('    Writing to %s.\n'%(dest))
+                ensure_dir(dest)
+                with open(dest, 'wb') as f:
+                    f.write(md)
+                output('    Done.\n')
+            except:
+                output('    Error in writing.\n')
+                continue
 
 def budoc_one(module_name, ident_name = None, **kwargs):
     stdout = kwargs.get('stdout', False)
