@@ -10,7 +10,7 @@ setup(
     name='budoc',
     version='0.2',
     url='http://github.com/zeaphoo/budoc/',
-    download_url='http://github.com/zeaphoo/budoc/tarball/0.1',
+    download_url='http://github.com/zeaphoo/budoc/tarball/0.2',
     license='BSD',
     author='zeaphoo',
     author_email='zeaphoo@gmail.com',
