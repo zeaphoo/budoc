@@ -8,7 +8,7 @@ from setuptools import setup
 
 setup(
     name='budoc',
-    version='0.1',
+    version='0.2',
     url='http://github.com/zeaphoo/budoc/',
     download_url='http://github.com/zeaphoo/budoc/tarball/0.1',
     license='BSD',
