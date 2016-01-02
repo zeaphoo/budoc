@@ -8,10 +8,8 @@ Prominent features include:
   to find docstrings for module, class and instance variables.
 * Usage is simple. Just write your documentation as Markdown. There are no
   added special syntax rules.
-* `budoc` respects your `__all__` variable when present.
 * Inheritance is used when possible to infer docstrings for class members.
 
-The above features are explained in more detail in budoc's documentation.
 
 `budoc` has been tested on Python 2.6, 2.7.
 
