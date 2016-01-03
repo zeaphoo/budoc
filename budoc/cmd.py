@@ -55,15 +55,15 @@ def run():
 
     module_or_config = args.module_or_config
     name, ext = os.path.splitext(module_or_config)
-    if ext == '' or ext.lower() == '.py':
-        budoc.budoc_one(args.module_or_config, args.ident_name, stdout=True)
-    else:
+    if ext.lower() in ['.yml', '.yaml']:
         try:
             bu_config = load_config(module_or_config)
         except:
             print('Config file %s not exits or not valid yaml format.'%(module_or_config))
             sys.exit(-1)
         budoc.budoc_all(bu_config, args.ident_name)
+    else:
+        budoc.budoc_one(args.module_or_config, args.ident_name, stdout=True)
 
 
 if __name__ == '__main__':
