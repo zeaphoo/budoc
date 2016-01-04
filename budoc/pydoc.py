@@ -8,6 +8,7 @@ import os.path as path
 import pkgutil
 import re
 import sys
+import types
 
 import_path = sys.path[:]
 
@@ -822,7 +823,14 @@ class Function (Doc):
                 continue
             if s.defaults is not None and len(s.args) - i <= len(s.defaults):
                 defind = len(s.defaults) - (len(s.args) - i)
-                params.append('%s=%s' % (param, repr(s.defaults[defind])))
+                default_value = s.defaults[defind]
+                value = repr(default_value).strip()
+                if value[0] == '<' and value[-1] == '>':
+                    if type(default_value) == types.TypeType:
+                        value = default_value.__name__
+                    elif type(default_value) == types.ObjectType:
+                        value = '%s()'%(default_value.__class__.__name__)
+                params.append('%s=%s' % (param, value))
             else:
                 params.append(fmt_param(param))
         if s.varargs is not None:
